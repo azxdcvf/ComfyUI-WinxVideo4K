@@ -1,0 +1,77 @@
+{
+  "7": {
+    "class_type": "VHS_LoadVideo",
+    "inputs": {
+      "video": "upload_video.mp4",
+      "force_rate": 0,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 0,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "None"
+    }
+  },
+  "10": {
+    "class_type": "VHS_VideoInfo",
+    "inputs": {
+      "video_info": [
+        "7",
+        3
+      ]
+    }
+  },
+  "101": {
+    "class_type": "WinxVideo4KUpscale",
+    "inputs": {
+      "images": [
+        "7",
+        0
+      ],
+      "model_name": "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+      "device": "cuda",
+      "tile_size": 256
+    }
+  },
+  "102": {
+    "class_type": "WinxRife46",
+    "inputs": {
+      "images": [
+        "101",
+        0
+      ],
+      "source_fps": [
+        "10",
+        5
+      ],
+      "multiplier": 2,
+      "device": "cuda"
+    }
+  },
+  "12": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "frame_rate": [
+        "102",
+        1
+      ],
+      "loop_count": 0,
+      "filename_prefix": "WinxVideo4K",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 18,
+      "save_metadata": false,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "102",
+        0
+      ],
+      "audio": [
+        "7",
+        2
+      ]
+    }
+  }
+}

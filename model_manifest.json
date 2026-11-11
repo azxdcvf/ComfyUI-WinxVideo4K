@@ -1,0 +1,17 @@
+[
+  {
+    "file": "models/winx_video4k/Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+    "size": 17014765,
+    "sha256": "99c7a82dbd8396bb1ce149567c7109a5622b73d0053c3d21e8e22c17cb385600"
+  },
+  {
+    "file": "models/winx_video4k/Video4K_V10_video_V10_x2_S2GAN_417000.onnx",
+    "size": 22759276,
+    "sha256": "4437ec7ea7a30cd6fb3e53f7dac1de4dcf93ef0122d4b45a3cba6f92f1c75568"
+  },
+  {
+    "file": "models/winx_video4k/rife_v4.6_winx_fp16weights.onnx",
+    "size": 21297017,
+    "sha256": "b61512a3466c7b9c989e54a85b78305cdac6f884de549a97f01ccfaa2b3b9892"
+  }
+]
