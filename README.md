@@ -2,7 +2,7 @@
 
 Video4K V9/V10 的 2 倍尺寸增强节点，以及使用本地 NCNN 权重转换的 RIFE 4.6 补帧节点。用于搭建上传视频、增强、补帧并导出 MP4 的 ComfyUI 工作流。
 
-**仓库包含节点代码、示例工作流和安装说明，不包含模型权重。** 云平台维护者需要另行安装三份模型。本仓库不是 Winx 官方项目，也不代表已复刻 Winx 软件的全部处理流程。
+**节点代码、示例工作流和安装说明位于仓库中，三份模型在 [模型下载页（Releases）](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/tag/models-20261116) 提供。** 克隆代码后仍需下载并安装模型。本仓库不是 Winx 官方项目，也不代表已复刻 Winx 软件的全部处理流程。
 
 ## 节点
 
@@ -26,7 +26,7 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 
 请另外准备：
 
-- 三份模型，放到 `ComfyUI/models/winx_video4k/`；文件名和 SHA256 见 [模型清单](model_manifest.json) 与 [模型说明](docs/MODELS.md)。节点不会自动下载模型。
+- 从 [Releases 下载模型整包](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/winx-video4k-models-20261116.zip)，将其中 `models/` 合并到 ComfyUI 根目录，最终三份模型应位于 `ComfyUI/models/winx_video4k/`；文件名和 SHA256 见 [模型清单](model_manifest.json) 与 [模型说明及单文件下载](docs/MODELS.md)。节点不会自动下载模型。
 - [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite) 及其依赖，用于视频读取、视频信息和视频合成。
 - VHS 可调用的 FFmpeg，用于导出 H.264 MP4 和音频。
 

@@ -1,6 +1,22 @@
 # 模型安装、来源与验证范围
 
-本仓库不附带权重，也不自动下载权重。请由有权使用模型的部署方另行提供三份文件，放入 `ComfyUI/models/winx_video4k/`，按根目录的 [model_manifest.json](../model_manifest.json) 校验。
+三份模型通过 [GitHub Releases](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/tag/models-20261116) 提供，不存入代码的 Git 历史，也不在节点运行时自动下载。下载后放入 `ComfyUI/models/winx_video4k/`，按根目录的 [model_manifest.json](../model_manifest.json) 校验。
+
+## 下载
+
+可下载 [模型整包](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/winx-video4k-models-20261116.zip)，将其中的 `models/` 合并到实际 ComfyUI 根目录，或按下表下载单个文件。下载文件名和大小写保持不变。
+
+| 文件 | 直接下载 | 字节数 |
+| --- | --- | --- |
+| `Video4K_V9_video_V9_x2_S2GAN_latest.onnx` | [V9 ONNX](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/Video4K_V9_video_V9_x2_S2GAN_latest.onnx) | 17,014,765 |
+| `Video4K_V10_video_V10_x2_S2GAN_417000.onnx` | [V10 ONNX](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/Video4K_V10_video_V10_x2_S2GAN_417000.onnx) | 22,759,276 |
+| `rife_v4.6_winx_fp16weights.onnx` | [RIFE 4.6 ONNX](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/rife_v4.6_winx_fp16weights.onnx) | 21,297,017 |
+
+校验文件：[SHA256SUMS.txt](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/SHA256SUMS.txt)，包含三个单文件与模型整包的 SHA256。
+
+解压整包时，应将包内 `models/winx_video4k/` 对应到实际 ComfyUI 的同名路径。请勿把模型放到节点仓库自己的 `models/` 目录。平台使用任务容器或统一模型存储时，还需确认执行实例可读到该目录。
+
+## 文件用途
 
 | 文件 | 用途 |
 | --- | --- |

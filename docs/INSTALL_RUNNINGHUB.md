@@ -1,6 +1,6 @@
 # RunningHub / 云端 ComfyUI 安装与验收
 
-本仓库的 `__init__.py`、`runtime.py` 和 `requirements.txt` 直接位于根目录，可作为普通 ComfyUI 自定义节点仓库克隆安装。模型另行交接；不能仅导入工作流 JSON 代替节点和依赖安装。
+本仓库的 `__init__.py`、`runtime.py` 和 `requirements.txt` 直接位于根目录，可作为普通 ComfyUI 自定义节点仓库克隆安装。三份模型从 [GitHub Releases](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/tag/models-20261116) 另外下载；不能仅导入工作流 JSON 或克隆代码代替模型和依赖安装。
 
 仓库地址：<https://github.com/azxdcvf/ComfyUI-WinxVideo4K>。
 
@@ -32,6 +32,8 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 ```
 
 仓库里的 `model_manifest.json` 路径以 ComfyUI 根目录为基准。请不要把三份模型放到本仓库内的 `models/`，也不要多套一层重复的节点目录。平台使用统一模型存储时，需要正确挂载/映射到实际运行环境可读的 `winx_video4k` 目录，并持久化保存。
+
+下载 [模型整包](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/download/models-20261116/winx-video4k-models-20261116.zip)，把包内 `models/` 合并到实际 ComfyUI 根目录。单文件下载地址与校验说明见 [模型说明](MODELS.md)。三个文件需要保持原文件名和大小写，并确认 Standard 等实际任务实例的模型挂载也已生效。
 
 ## 2. GPU 依赖
 
