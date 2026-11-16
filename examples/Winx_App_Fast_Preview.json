@@ -1,0 +1,86 @@
+{
+  "last_node_id": 201,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 200,
+      "type": "WinxVideoApp",
+      "title": "上传视频 · 画质 / 尺寸 / 插帧 / 防抖",
+      "pos": [
+        80,
+        80
+      ],
+      "size": [
+        530,
+        670
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VHS_FILENAMES",
+          "links": []
+        },
+        {
+          "name": "report",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "WinxVideoApp"
+      },
+      "widgets_values": [
+        "upload_video.mp4",
+        "fast",
+        "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+        "1280_long_edge",
+        2,
+        false,
+        true,
+        "off",
+        2.0,
+        512,
+        "cuda",
+        20,
+        "auto"
+      ]
+    },
+    {
+      "id": 201,
+      "type": "Note",
+      "title": "运行前阅读 · 2026-11-17",
+      "pos": [
+        680,
+        80
+      ],
+      "size": [
+        660,
+        450
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "properties": {},
+      "widgets_values": [
+        "本文件只处理源片前2秒；先看效果和耗时。\n先让客服更新同一个 GitHub 仓库并注册 WinxVideoApp，再上传自己的视频。\nenhancement: fast=AI输入长边至多640，quality=原尺寸增强，off=关闭AI增强。\noutput_scale: source=原尺寸，1280_long_edge=长边1280；720p等按短边计算并保持横竖方向。\ninterpolation: 1=关闭；2/3/4/5=真实RIFE插帧，通常保持时长。\nslow_motion=true 才会延长时长，音频同步放慢并保持音调。\nstabilization: off/fast/two_pass；两遍防抖需要FFmpeg的vidstab滤镜。\npreview_seconds: 2=只处理源片前2秒；0=整片。默认CUDA，不自动把AI转到CPU。\n快速模式和3/4倍尺寸含普通缩放；不承诺与Winx专有模型相同画质。\n本地CPU小样通过不等于RunningHub/GPU速度已验证；不要直接提交高分辨率整片。"
+      ]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.85,
+      "offset": [
+        30,
+        30
+      ]
+    }
+  },
+  "version": 0.4
+}

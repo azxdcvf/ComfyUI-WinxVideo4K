@@ -4,6 +4,31 @@
 
 仓库地址：<https://github.com/azxdcvf/ComfyUI-WinxVideo4K>。
 
+## 已安装旧版时更新新版流式应用
+
+新增注册类型为 **`WinxVideoApp`**，原有 `WinxVideo4KUpscale` / `WinxRife46` 和示例仍保留。更新不需要重新下载已安装且校验正确的三份模型。
+
+```bash
+cd "/替换为实际ComfyUI根目录/custom_nodes/ComfyUI-WinxVideo4K"
+git pull --ff-only
+```
+
+请维护者先确认工作区没有未提交的平台修改，再更新相应实际执行实例；同时发布/允许编辑器使用新类型 `WinxVideoApp`，重启 ComfyUI 并刷新节点列表和浏览器。代码新增 `streaming.py` 与 `web/` 上传及预览扩展，不要只复制旧 `__init__.py`。如果平台有单独的应用节点注册，需同步其字段与 `VHS_FILENAMES` / MP4 输出识别。
+
+需要可执行的 **FFmpeg 与 ffprobe**，默认按环境变量 `WINX_FFMPEG_PATH` / `WINX_FFPROBE_PATH`、兼容的 VHS 路径、同目录 ffprobe 或 PATH 查找。仅有 imageio 的 FFmpeg 而没有 ffprobe 也不够。模型推理依赖没有新增，继续复用原有 ONNX Runtime GPU / PyTorch / NumPy 环境。
+
+快速防抖要求 FFmpeg 的 `deshake`。两遍防抖要求 `vidstabdetect` 和 `vidstabtransform`（通常需要编译启用 libvidstab），缺失时会在 AI 推理前报错，不会假装完成防抖。若暂不提供这些滤镜，应用保留 `stabilization=off`，并隐藏不可用选项。
+
+`encoder=auto` 会尝试实际调用 `h264_nvenc` 编码一帧，不可用则选择 `libx264 veryfast`。如果平台禁用 NVENC 或 FFmpeg 未编译相应支持，不影响 AI 的 CUDA 设置；编码器可固定为 `libx264`。
+
+先导入 `examples/Winx_App_Fast_Preview.json`，上传低分辨率带声音的短视频，保持默认 `preview_seconds=2`、`enhancement=fast`、`output_scale=1280_long_edge`、`interpolation=2`、`device=cuda`、`stabilization=off`。执行本身由账户按平台规则计费；仓库没有自动提交云端任务。记录 GPU 利用率、节点总耗时及实际余额变化，核对成片时长、声音、输出尺寸与帧率后再处理整片。
+
+本地已验证真实 ONNX / FFmpeg 和 ComfyUI PromptExecutor 的小样；新版的 RunningHub 安装、CUDA 速度、浏览器上传与应用发布未验证。两遍防抖因本地缺滤镜尚未验证成片。
+
+---
+
+## 以下为保留的旧版安装与验证说明
+
 ```bash
 cd "/替换为实际ComfyUI根目录/custom_nodes"
 git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
@@ -94,6 +119,6 @@ CUDA 不可用或初始化失败会报错，不自动把整项任务转为 CPU�
 
 ## 6. 后续应用配置
 
-首版一次持有输入、增强和补帧后的全部帧；分块不解决整片主机内存占用。不连接 VHS `meta_batch`，长片流式处理与跨段补帧未实现。
+旧版 IMAGE 工作流一次持有输入、增强和补帧后的全部帧；分块不解决整片主机内存占用。不连接 VHS `meta_batch`。新增的 `WinxVideoApp` 使用文件流式读取和输出，不需要接入 `meta_batch`。
 
 通过短片验证后，再参考 [应用字段映射](APP_FIELDS.md) 配置视频上传与 MP4 输出。原版 `frame_load_cap=0` 表示整片，增加处理范围前请先评估资源。公开或商业发布前另需确认模型授权。

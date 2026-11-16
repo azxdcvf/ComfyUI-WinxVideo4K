@@ -8,6 +8,9 @@ import comfy.utils
 import folder_paths
 
 from .runtime import RIFE_MODEL, VIDEO4K_MODELS, Rife46, Video4K
+from .streaming import WinxVideoApp
+
+WEB_DIRECTORY = "./web"
 
 
 folder_paths.add_model_folder_path("winx_video4k", str(Path(folder_paths.models_dir) / "winx_video4k"))
@@ -65,7 +68,7 @@ class WinxRife46:
         return {"required": {
             "images": ("IMAGE",),
             "source_fps": ("FLOAT", {"default": 25.0, "min": 0.001, "max": 1000.0}),
-            "multiplier": ("INT", {"default": 2, "min": 1, "max": 4}),
+            "multiplier": ("INT", {"default": 2, "min": 1, "max": 5}),
             "device": (["cuda", "cpu"],),
         }}
 
@@ -78,8 +81,8 @@ class WinxRife46:
     def interpolate(self, images, source_fps, multiplier, device):
         if images.ndim != 4 or images.shape[-1] != 3 or images.shape[0] < 1:
             raise ValueError("Expected non-empty RGB IMAGE frames")
-        if not math.isfinite(source_fps) or source_fps <= 0 or multiplier not in (1, 2, 3, 4):
-            raise ValueError("Positive source_fps and integer multiplier from 1 to 4 required")
+        if not math.isfinite(source_fps) or source_fps <= 0 or multiplier not in (1, 2, 3, 4, 5):
+            raise ValueError("Positive source_fps and integer multiplier from 1 to 5 required")
         frames = images.detach().to(device="cpu", dtype=torch.float32)
         if multiplier == 1:
             return (frames, float(source_fps))
@@ -103,8 +106,9 @@ class WinxRife46:
         return (result, float(source_fps * multiplier))
 
 
-NODE_CLASS_MAPPINGS = {"WinxVideo4KUpscale": WinxVideo4KUpscale, "WinxRife46": WinxRife46}
+NODE_CLASS_MAPPINGS = {"WinxVideo4KUpscale": WinxVideo4KUpscale, "WinxRife46": WinxRife46, "WinxVideoApp": WinxVideoApp}
 NODE_DISPLAY_NAME_MAPPINGS = {
     "WinxVideo4KUpscale": "Video4K V9/V10 · 2x (ONNX)",
     "WinxRife46": "RIFE 4.6 · Frame Interpolation (ONNX)",
+    "WinxVideoApp": "Winx Video App · Streaming Enhance + RIFE",
 }

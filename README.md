@@ -1,6 +1,6 @@
 # ComfyUI-WinxVideo4K
 
-Video4K V9/V10 的 2 倍尺寸增强节点，以及使用本地 NCNN 权重转换的 RIFE 4.6 补帧节点。用于搭建上传视频、增强、补帧并导出 MP4 的 ComfyUI 工作流。
+Video4K V9/V10 的画质增强、RIFE 4.6 的真实插帧，以及可调尺寸、慢动作和防抖的视频应用节点。用于搭建上传视频、处理并导出 MP4 的 ComfyUI / RunningHub 工作流。
 
 **节点代码、示例工作流和安装说明位于仓库中，三份模型在 [模型下载页（Releases）](https://github.com/azxdcvf/ComfyUI-WinxVideo4K/releases/tag/models-20261116) 提供。** 克隆代码后仍需下载并安装模型。本仓库不是 Winx 官方项目，也不代表已复刻 Winx 软件的全部处理流程。
 
@@ -9,7 +9,8 @@ Video4K V9/V10 的 2 倍尺寸增强节点，以及使用本地 NCNN 权重转�
 | 注册类型 | 功能 | 主要参数 |
 | --- | --- | --- |
 | `WinxVideo4KUpscale` | Video4K V9/V10 ONNX，宽高各 2 倍 | `model_name`、`device`、`tile_size` |
-| `WinxRife46` | RIFE 4.6 ONNX，1 至 4 倍帧率 | `source_fps`、`multiplier`、`device` |
+| `WinxRife46` | RIFE 4.6 ONNX，1 至 5 倍帧率，旧版 IMAGE 接口 | `source_fps`、`multiplier`、`device` |
+| `WinxVideoApp` | 文件流式处理、快速/质量/关闭增强、尺寸、1–5 倍插帧、慢动作、硬切处理、防抖 | 上传视频和可调应用参数，输出 MP4 与运行报告 |
 
 节点分类：`Winx Video4K`。
 
@@ -32,7 +33,19 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 
 安装后重启实际执行任务的 ComfyUI 服务。RunningHub 维护者请参考 [云端安装与验收说明](docs/INSTALL_RUNNINGHUB.md)。
 
-## 工作流
+## 新增：速度优先的应用工作流（2026-11-17）
+
+导入 [快速预览工作流](examples/Winx_App_Fast_Preview.json)，在 `WinxVideoApp` 节点上传视频。默认仅处理**源视频前 2 秒**、输出长边 1280、真实 2 倍 RIFE 插帧、防抖关闭。正常模式维持视频时长；慢动作才会延长时长，并同步拉长音频、保留音调。先确认预览质量和云端耗时，再使用 [整片工作流](examples/Winx_App_Fast_Full.json) 或把 `preview_seconds` 改成 0。文件名含 `_API` 的副本供程序调用。
+
+`fast` 将 AI 输入长边限制到至多 640，2 倍增强结果的长边至多 1280；更大的最终尺寸会进行普通缩放。`quality` 使用原尺寸进行 AI 增强；`off` 关闭 AI 增强，仍可插帧、缩放与防抖。尺寸 1×/2×/3×/4× 与插帧倍率是独立参数；3×/4×尺寸超过模型原生 2×的部分属于普通缩放。快速模式以细节保留换取更少计算，不承诺与质量模式或 Winx 专有模型效果相同。
+
+新节点只保留相邻帧，复用任务内的模型会话并及时编码输出，不依赖 VHS `meta_batch` 或重复提交任务。**流式主要降低内存；实际提速来自较小的 AI/插帧尺寸、合理的倍率与关闭额外处理，不能据此承诺具体速度倍数。** 运行报告会记录实际 AI 输入、插帧尺寸、编码器、帧数和总耗时。`encoder=auto` 先实际试编码 NVENC，不可用则使用 `libx264 veryfast`；AI 的 `device=cuda` 不会因此改成 CPU。
+
+新增节点需要 FFmpeg 与 ffprobe。快速防抖需要 `deshake`；两遍防抖需要 `vidstabdetect` / `vidstabtransform`，会额外增加分析时间。所需滤镜缺失时，在 AI 推理前明确报错；默认不启用防抖。
+
+应用字段见 [应用参数说明](docs/APP_FIELDS.md)，环境与更新步骤见 [RunningHub 安装说明](docs/INSTALL_RUNNINGHUB.md)。**更新仓库和导入 JSON 不等于 RunningHub 已安装/注册新节点或已发布应用。新节点仍需平台维护者同步代码、注册 `WinxVideoApp`，然后进行云端短片验收。**
+
+## 保留：旧版 IMAGE 工作流
 
 ```text
 VHS_LoadVideo → WinxVideo4KUpscale → WinxRife46 → VHS_VideoCombine
@@ -49,7 +62,7 @@ VHS_LoadVideo → WinxVideo4KUpscale → WinxRife46 → VHS_VideoCombine
 ## 运行范围
 
 - 默认 `device=cuda`，`tile_size=256`。CUDA provider 不可用或初始化失败会报错，不自动把整项任务转为 CPU；部分形状操作仍可能由 ONNX Runtime 分配给 CPU。
-- 当前一次持有输入、增强和补帧后的帧。分块只控制增强推理的峰值，不解决整片的主机内存占用。当前不支持 VHS `meta_batch`、长片流式处理或跨段补帧。
+- 旧版 `WinxVideo4KUpscale` / `WinxRife46` 一次持有输入、增强和补帧后的帧；分块只控制增强推理峰值，不解决整片内存，不支持 VHS `meta_batch`。长片请使用新增 `WinxVideoApp`，不要直接把旧 RIFE 接到分批节点上。
 - “Video4K”是模型名称，输出尺寸是输入宽高的 2 倍，不会把任何输入固定变为 3840×2160。
 - Video4K 候选与 Winx `.drp` 内权重的完全等价性未证明；模型含随机噪声算子，尚未验证逐次确定性与完整视频的时序表现。模型来源、RIFE 转换范围与授权说明见 [模型说明](docs/MODELS.md)。
 
@@ -57,4 +70,6 @@ VHS_LoadVideo → WinxVideo4KUpscale → WinxRife46 → VHS_VideoCombine
 
 截至 2026-11-11，已有本地 CPU 的模型推理、尺寸处理、节点集成及真实 ComfyUI `PromptExecutor` + VHS 整图测试：128×96、25 帧/25fps → 256×192、50 帧/50fps、1 秒并带测试音轨。RIFE 在一组 128×128 实际帧上，转换 ONNX 与 NCNN 的 8 位 RGB 输出一致；该结论限于此组输入与 CPU 后端。
 
-RunningHub 云端安装、CUDA 执行、完整视频负载、Winx GUI 成片对照及应用发布均未验证。云端短片验收完成后，可按 [应用字段映射](docs/APP_FIELDS.md) 配置应用。
+2026-11-17，`WinxVideoApp` 的本地 CPU 小样通过：真实 RIFE 1×/2×/3×/5×帧数、帧率、时长与调用次数，慢动作音轨长度，预览裁切，V9/V10 增强、快速防抖、竖屏旋转、硬切处理、无音轨输入、取消后子进程及临时文件清理，以及实际 ComfyUI `PromptExecutor` 整图执行。验证命令入口为 [tests/validate_streaming.py](tests/validate_streaming.py)。
+
+本地 FFmpeg 缺少 vidstab，两遍防抖仅验证了缺失滤镜时会提前报错，未验证其成片。新节点的 RunningHub 安装、CUDA 性能、浏览器上传、完整视频负载、Winx GUI 成片对照及应用发布尚未验证。本仓库更新过程中未提交付费云端任务。旧版云端处理已由用户反馈可以启动，这不代表新版已通过云端验收。
