@@ -1,0 +1,88 @@
+{
+  "last_node_id": 201,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 200,
+      "type": "WinxVideoApp",
+      "title": "上传视频 · 1.5倍尺寸 / 48fps真实插帧",
+      "pos": [
+        80,
+        80
+      ],
+      "size": [
+        580,
+        730
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VHS_FILENAMES",
+          "links": []
+        },
+        {
+          "name": "report",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "WinxVideoApp"
+      },
+      "widgets_values": [
+        "upload_video.mp4",
+        "fast",
+        "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+        "1.5x",
+        2,
+        false,
+        true,
+        "off",
+        0.0,
+        512,
+        "cuda",
+        20,
+        "auto",
+        48,
+        25
+      ]
+    },
+    {
+      "id": 201,
+      "type": "Note",
+      "title": "新版参数 · 2026-11-20",
+      "pos": [
+        680,
+        80
+      ],
+      "size": [
+        730,
+        510
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "properties": {},
+      "widgets_values": [
+        "处理整片；云端运行会计费。\n默认宽高各1.5倍、目标48fps、fast增强、CUDA、防抖关闭。\n输出尺寸和清晰度不同：1.5x是宽高各乘1.5，像素量约2.25倍，不代表清晰度增加50%。\noutput_scale可改source（原尺寸）、1.5x、2x或其他尺寸。\ntarget_fps=48直接按输出时间戳进行真实RIFE插帧，如30→48、24→48。\n目标帧率低于/等于源帧率时采用丢帧/保留原帧，不运行RIFE。\ntarget_fps=0才使用interpolation整数倍率，2代表30→60、24→48。\nfast的AI输入长边至多640、插帧至多1280，更大输出含普通缩放；quality使用原尺寸AI输入、更慢。\nmax_source_seconds=25限制上传源片，超过25秒会在AI推理前拒绝，即使只预览2秒也一样。\n48fps的非整数转换不保证比60fps快，实际速度取决于所需RIFE调用和处理尺寸。\n15秒片在10分钟内完成尚未在这些新参数下云测，不能作为保证。旧工作流保留。"
+      ]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.85,
+      "offset": [
+        30,
+        30
+      ]
+    }
+  },
+  "version": 0.4
+}

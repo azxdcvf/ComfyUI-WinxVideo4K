@@ -10,7 +10,7 @@ Video4K V9/V10 的画质增强、RIFE 4.6 的真实插帧，以及可调尺寸�
 | --- | --- | --- |
 | `WinxVideo4KUpscale` | Video4K V9/V10 ONNX，宽高各 2 倍 | `model_name`、`device`、`tile_size` |
 | `WinxRife46` | RIFE 4.6 ONNX，1 至 5 倍帧率，旧版 IMAGE 接口 | `source_fps`、`multiplier`、`device` |
-| `WinxVideoApp` | 文件流式处理、快速/质量/关闭增强、尺寸、1–5 倍插帧、慢动作、硬切处理、防抖 | 上传视频和可调应用参数，输出 MP4 与运行报告 |
+| `WinxVideoApp` | 文件流式处理、可调尺寸、目标帧率或 1–5 倍插帧、慢动作、硬切处理、防抖 | 上传视频和可调应用参数，输出 MP4 与运行报告 |
 
 节点分类：`Winx Video4K`。
 
@@ -33,7 +33,17 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 
 安装后重启实际执行任务的 ComfyUI 服务。RunningHub 维护者请参考 [云端安装与验收说明](docs/INSTALL_RUNNINGHUB.md)。
 
-## 新增：速度优先的应用工作流（2026-11-17）
+## 新增：1.5 倍尺寸 / 48fps 可调应用（2026-11-20）
+
+新的 [2 秒预览](examples/Winx_App_1p5x_48fps_Preview.json) 和 [整片工作流](examples/Winx_App_1p5x_48fps_Full.json) 默认 `output_scale=1.5x`、`target_fps=48`、`enhancement=fast`、`max_source_seconds=25`，CUDA、防抖关闭。它们仍使用 `WinxVideoApp`，旧节点和旧工作流文件保留。超过 25 秒或无法确定时长的上传源片会在 AI 推理前拒绝，预览模式也不例外；整片版处理允许范围内的全部视频。
+
+`1.5x` 是宽、高各放大 1.5 倍，例如 1080×1920 → 1620×2880，内容不裁切，像素量约为 2.25 倍。它是输出尺寸，不是“清晰度提升 50%”的计量。尺寸可改回 `source` 或其他预设；AI 增强仍由 `fast` / `quality` / `off` 控制。快速模式的 AI / 插帧工作尺寸仍受原有上限限制，放大到较高输出分辨率时含普通缩放，不保证恢复同等数量的真实细节。
+
+`target_fps=1..120` 指定输出帧率，例如 24→48、25→48、30→48。高于源帧率时，把每个输出时间戳映射到相邻源帧，使用 RIFE 的实际中间时刻；保持播放速度，末尾因帧数取整可能延长不到一个输出帧。目标不高于源帧率时保留/丢弃源帧，不运行 RIFE。`target_fps=0` 恢复旧版 `interpolation=1..5` 整数倍模式；例如 30fps 的 2 倍是 60fps。指定目标帧率时必须关闭慢动作，避免两种时长规则冲突。新字段追加到原字段之后，旧 API 不传入时仍按原倍率运行。
+
+**输出帧率和耗时并非严格线性关系。** 30→48 的非整数倍率可能比 30→60 调用更多次 RIFE，因为能直接复用的源帧更少；运行报告记录 `rife_inferences`。15 秒视频在 10 分钟内完成仍是待云端验证的目标，不能从短片或帧率数字直接保证。部署时须让维护者更新同一个仓库、同步 `output_scale` 选项和两个新字段，再导入这些新工作流；原有三份模型无需重下。
+
+## 速度优先的应用工作流（2026-11-17，保留）
 
 导入 [快速预览工作流](examples/Winx_App_Fast_Preview.json)，在 `WinxVideoApp` 节点上传视频。默认仅处理**源视频前 2 秒**、输出长边 1280、真实 2 倍 RIFE 插帧、防抖关闭。正常模式维持视频时长；慢动作才会延长时长，并同步拉长音频、保留音调。先确认预览质量和云端耗时，再使用 [整片工作流](examples/Winx_App_Fast_Full.json) 或把 `preview_seconds` 改成 0。文件名含 `_API` 的副本供程序调用。
 
@@ -72,4 +82,6 @@ VHS_LoadVideo → WinxVideo4KUpscale → WinxRife46 → VHS_VideoCombine
 
 2026-11-17，`WinxVideoApp` 的本地 CPU 小样通过：真实 RIFE 1×/2×/3×/5×帧数、帧率、时长与调用次数，慢动作音轨长度，预览裁切，V9/V10 增强、快速防抖、竖屏旋转、硬切处理、无音轨输入、取消后子进程及临时文件清理，以及实际 ComfyUI `PromptExecutor` 整图执行。验证命令入口为 [tests/validate_streaming.py](tests/validate_streaming.py)。
 
-本地 FFmpeg 缺少 vidstab，两遍防抖仅验证了缺失滤镜时会提前报错，未验证其成片。新节点的 RunningHub 安装、CUDA 性能、浏览器上传、完整视频负载、Winx GUI 成片对照及应用发布尚未验证。本仓库更新过程中未提交付费云端任务。旧版云端处理已由用户反馈可以启动，这不代表新版已通过云端验收。
+2026-11-20，已有用户授权的一次 RunningHub Standard 短片成功记录：原流式预设 `fast`、长边 1280、2 倍插帧、CUDA、防抖关闭；处理 2 秒，平台任务耗时 51 秒，成片 720×1280、60fps、120 帧、2 秒并带 AAC 音轨。这项结果不证明原尺寸、高质量、1.5 倍尺寸、目标 48fps、15/25 秒整片或正式应用发布的速度和效果。
+
+本地 FFmpeg 缺少 vidstab，两遍防抖仅验证了缺失滤镜时会提前报错，未验证其成片。新参数的本地 CPU 验证入口仍为 `tests/validate_streaming.py`，包含实际 1.5 倍尺寸 + 48fps 输出、非整数插帧时刻、分数源帧率、降帧率、音轨和 25 秒源片限制，以及新旧 ComfyUI PromptExecutor 图执行。新增参数的 RunningHub 安装与云端运行仍需核实，不能把仓库更新视为云端已生效。

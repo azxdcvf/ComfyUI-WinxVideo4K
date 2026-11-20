@@ -8,6 +8,10 @@
 
 新增注册类型为 **`WinxVideoApp`**，原有 `WinxVideo4KUpscale` / `WinxRife46` 和示例仍保留。更新不需要重新下载已安装且校验正确的三份模型。
 
+2026-11-20 的更新继续使用 `WinxVideoApp`，没有新模型或新依赖。需要同步 `output_scale` 的 `1.5x` 选项，以及追加的可选整数字段 `target_fps`（0–120，节点默认 0）和 `max_source_seconds`（0–25，节点默认 0）。新应用工作流分别传入 48 和 25。不能仅更新编辑器中的字段；实际执行实例也必须更新 `streaming.py`。旧工作流不传两个字段时，仍走原整数倍插帧且不启用新增时长限制。
+
+更新后先导入 `examples/Winx_App_1p5x_48fps_Preview.json`：1.5 倍尺寸、48fps、快速增强、源片最长 25 秒、只处理前 2 秒。另有 Full 版本。平台应用参数映射见 [APP_FIELDS.md](APP_FIELDS.md)。`target_fps>0` 要求关闭慢动作，输出尺寸与画质增强模式独立；目标帧率低于/等于源帧率时不运行 RIFE。云端执行会计费，代码更新不会自动发起任务。
+
 ```bash
 cd "/替换为实际ComfyUI根目录/custom_nodes/ComfyUI-WinxVideo4K"
 git pull --ff-only
@@ -23,7 +27,7 @@ git pull --ff-only
 
 先导入 `examples/Winx_App_Fast_Preview.json`，上传低分辨率带声音的短视频，保持默认 `preview_seconds=2`、`enhancement=fast`、`output_scale=1280_long_edge`、`interpolation=2`、`device=cuda`、`stabilization=off`。执行本身由账户按平台规则计费；仓库没有自动提交云端任务。记录 GPU 利用率、节点总耗时及实际余额变化，核对成片时长、声音、输出尺寸与帧率后再处理整片。
 
-本地已验证真实 ONNX / FFmpeg 和 ComfyUI PromptExecutor 的小样；新版的 RunningHub 安装、CUDA 速度、浏览器上传与应用发布未验证。两遍防抖因本地缺滤镜尚未验证成片。
+本地验证使用真实 ONNX / FFmpeg 和 ComfyUI PromptExecutor 小样。2026-11-20，原 `fast` / 长边 1280 / 2 倍插帧的 RunningHub Standard 两秒任务成功，平台耗时 51 秒，输出 720×1280、60fps、120 帧并带声音。新增的 1.5 倍尺寸和目标 48fps 参数尚需平台更新与云端验收，完整视频速度和正式应用发布尚未验证。两遍防抖因本地缺滤镜尚未验证成片。
 
 ---
 

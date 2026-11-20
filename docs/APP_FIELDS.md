@@ -4,7 +4,24 @@
 
 先完成 [云端安装与验收说明](INSTALL_RUNNINGHUB.md) 中的节点安装和 CUDA 短片验收，再配置应用。
 
-## 新版 `WinxVideoApp`（2026-11-17）
+## 1.5 倍尺寸 / 48fps 预设（2026-11-20）
+
+编辑器导入 `examples/Winx_App_1p5x_48fps_Preview.json` 或 `examples/Winx_App_1p5x_48fps_Full.json`。仍是 **200 · WinxVideoApp**，原有字段顺序不变，末尾追加 `target_fps` 和 `max_source_seconds`。平台维护者需同步节点定义，包括 `output_scale` 的新选项 `1.5x`。旧示例和旧 API 继续按原倍率工作。
+
+| 应用控件 | 节点字段 | 新预设默认 / 说明 |
+| --- | --- | --- |
+| 输出尺寸 | `output_scale` | `1.5x`，宽、高各 1.5 倍，像素约 2.25 倍；允许选 `source` 等其他尺寸，不作为清晰度百分比 |
+| 画质增强 | `enhancement` | `fast`；可选 `quality` 原尺寸增强或 `off` 关闭增强。快速模式计算尺寸受限，较大输出含普通缩放 |
+| 输出帧率 | `target_fps` | 默认 48，可设 1–120；高于源帧率时用 RIFE 按实际时间戳插帧。低于/等于源帧率时丢帧/保留原帧，不运行 RIFE |
+| 整数倍模式 | `target_fps` / `interpolation` | 把 `target_fps` 设为 0 后，使用原有 `interpolation=1..5`。目标帧率非 0 时忽略倍率，要求 `slow_motion=false` |
+| 最长上传源片 | `max_source_seconds` | 新应用固定为 25 并隐藏；超过上限或时长未知会在 AI 推理前拒绝，不能用 2 秒预览绕过。0 只用于保持旧工作流无限制的行为 |
+| 处理范围 | `preview_seconds` | Preview 为 2，Full 为 0；0 表示处理整个允许的视频 |
+
+应用中可隐藏 `interpolation`、`slow_motion=false`、`max_source_seconds=25`、`device=cuda`、`tile_size=512`、`stabilization=off`、`encoder=auto`，向用户提供视频、增强模式、输出尺寸和输出帧率即可。若需要露出整数倍后备选项，应让界面在切换后同步设 `target_fps=0`，避免两个控件含义冲突。
+
+48fps 是整数帧率，但 30→48 是 1.6 倍，可能比 30→60 的 2 倍方案需要更多次 RIFE 推理。目标帧率模式的末尾取整误差小于一个输出帧，不改变播放速度，音轨按成片长度对齐。默认 1.5 倍 / 48fps 的完整视频云端耗时尚未验证，15 秒 / 10 分钟为目标而非已经通过的保证。
+
+## 原流式预设 `WinxVideoApp`（2026-11-17，保留）
 
 编辑器工作流：`examples/Winx_App_Fast_Preview.json`；整片：`examples/Winx_App_Fast_Full.json`。两者执行节点均为 **200 · WinxVideoApp**。以下是人工配置映射，不能当作 RunningHub 应用定义直接导入。
 
@@ -31,7 +48,7 @@
 
 > 上传视频，调节增强、输出尺寸和真实 RIFE 插帧倍率。默认快速模式、输出长边 1280、2 倍插帧、防抖关闭，先处理源片前 2 秒确认质量和耗时。将处理秒数改为 0 才处理整片。高分辨率、高倍率插帧和两遍防抖会增加耗时与平台费用。快速模式会缩小 AI 工作尺寸，细节效果与质量模式不同。
 
-代码更新、节点安装、工作流导入、GPU 试跑和正式应用发布分别需要核实；目前只完成本地 CPU 小样与实际 ComfyUI 整图执行，未提交付费云测。
+代码更新、节点安装、工作流导入、GPU 试跑和正式应用发布分别需要核实。2026-11-20 原流式预设已有一次 2 秒 RunningHub 成功记录：长边 1280、2 倍插帧，输出 720×1280 / 60fps，平台记录 51 秒。它不能证明新增 1.5 倍 / 48fps 参数已在云端安装或通过整片验收。
 
 ## 旧版 IMAGE 工作流字段（保留）
 

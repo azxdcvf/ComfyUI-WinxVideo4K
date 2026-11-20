@@ -21,7 +21,7 @@ from .runtime import RIFE_MODEL, VIDEO4K_MODELS, Rife46, Video4K
 
 
 VIDEO_EXTENSIONS = {"mp4", "mkv", "mov", "avi", "webm", "m4v", "mpeg", "mpg", "ts", "m2ts"}
-OUTPUT_SCALES = ["1280_long_edge", "source", "2x", "3x", "4x", "720p", "1080p", "1440p", "2160p"]
+OUTPUT_SCALES = ["1280_long_edge", "source", "1.5x", "2x", "3x", "4x", "720p", "1080p", "1440p", "2160p"]
 
 
 def _video_path(video):
@@ -47,8 +47,8 @@ def _target_size(width, height, mode):
         ratio = 1
     elif mode == "1280_long_edge":
         ratio = 1280 / max(width, height)
-    elif mode in ("2x", "3x", "4x"):
-        ratio = int(mode[0])
+    elif mode in ("1.5x", "2x", "3x", "4x"):
+        ratio = float(mode[:-1])
     else:
         ratio = int(mode[:-1]) / min(width, height)
     return _even(width * ratio), _even(height * ratio)
@@ -265,6 +265,10 @@ class WinxVideoApp:
             "device": (["cuda", "cpu"],),
             "crf": ("INT", {"default": 20, "min": 0, "max": 51}),
             "encoder": (["auto", "libx264", "h264_nvenc"], {"default": "auto"}),
+        }, "optional": {
+            # Append fields so existing serialized widgets keep their positions.
+            "target_fps": ("INT", {"default": 0, "min": 0, "max": 120, "tooltip": "1-120: exact output FPS, overrides interpolation. 0: legacy integer multiplier. Cannot combine with slow motion. Lower/equal FPS drops/keeps frames without RIFE."}),
+            "max_source_seconds": ("INT", {"default": 0, "min": 0, "max": 25, "tooltip": "Reject longer uploaded videos before AI processing, even in preview mode. 0: no duration limit for legacy workflows."}),
         }}
 
     RETURN_TYPES = ("VHS_FILENAMES", "STRING")
@@ -289,7 +293,7 @@ class WinxVideoApp:
 
     def process(self, video, enhancement, model_name, output_scale, interpolation,
                 slow_motion, skip_scene_transitions, stabilization, preview_seconds,
-                tile_size, device, crf, encoder="auto"):
+                tile_size, device, crf, encoder="auto", target_fps=0, max_source_seconds=0):
         if enhancement not in ("fast", "quality", "off") or output_scale not in OUTPUT_SCALES:
             raise ValueError("Invalid enhancement or output scale")
         if model_name not in VIDEO4K_MODELS or device not in ("cuda", "cpu"):
@@ -298,6 +302,12 @@ class WinxVideoApp:
             raise ValueError("Invalid stabilization or encoder")
         if not isinstance(interpolation, int) or not 1 <= interpolation <= 5:
             raise ValueError("interpolation must be an integer from 1 to 5")
+        if not isinstance(target_fps, int) or not 0 <= target_fps <= 120:
+            raise ValueError("target_fps must be an integer from 0 to 120")
+        if target_fps and slow_motion:
+            raise ValueError("Exact target_fps requires slow_motion=false; use target_fps=0 for legacy slow motion")
+        if not isinstance(max_source_seconds, int) or not 0 <= max_source_seconds <= 25:
+            raise ValueError("max_source_seconds must be an integer from 0 to 25")
         if tile_size != 0 and (not 64 <= tile_size <= 1024 or tile_size % 32):
             raise ValueError("tile_size must be 0 or a multiple of 32 from 64 to 1024")
         if not math.isfinite(preview_seconds) or not 0 <= preview_seconds <= 3600 or not 0 <= crf <= 51:
@@ -306,6 +316,8 @@ class WinxVideoApp:
         source = _video_path(video)
         ffmpeg, ffprobe = _ffmpeg_paths()
         info = _probe(ffprobe, source)
+        if max_source_seconds and (not math.isfinite(info["duration"]) or not 0 < info["duration"] <= max_source_seconds):
+            raise ValueError(f"Uploaded video must have a known duration of at most {max_source_seconds} seconds; trim the source first")
         output_size = _target_size(info["width"], info["height"], output_scale)
         if max(output_size) > 16384:
             raise ValueError("Output exceeds 16384 pixels on one edge")
@@ -317,7 +329,8 @@ class WinxVideoApp:
         ai_size = tuple(size * 2 for size in working_size) if enhancement != "off" else working_size
         interpolation_size = _fit_size(*ai_size, min(target_edge, max(ai_size)))
         source_fps = info["fps"]
-        output_fps = source_fps if slow_motion else source_fps * interpolation
+        sample_ratio = Fraction(target_fps, 1) / source_fps if target_fps else Fraction(interpolation, 1)
+        output_fps = source_fps if slow_motion else source_fps * sample_ratio
         limit = math.ceil(preview_seconds * source_fps) if preview_seconds else None
         expected = limit or math.ceil(info["duration"] * source_fps) or 1
         progress = comfy.utils.ProgressBar(expected)
@@ -325,7 +338,7 @@ class WinxVideoApp:
         encoder = _choose_encoder(ffmpeg, encoder, crf)
         # One session per active video, reused for every frame/tile.
         model = Video4K(folder_paths.get_full_path_or_raise("winx_video4k", model_name), device) if enhancement != "off" else None
-        rife = Rife46(folder_paths.get_full_path_or_raise("winx_video4k", RIFE_MODEL), device) if interpolation > 1 else None
+        rife = Rife46(folder_paths.get_full_path_or_raise("winx_video4k", RIFE_MODEL), device) if sample_ratio > 1 else None
 
         width, height = working_size
         rate = f"{source_fps.numerator}/{source_fps.denominator}"
@@ -354,7 +367,7 @@ class WinxVideoApp:
                 if interpolation_size != output_size:
                     encode_args += ["-filter_threads", "2", "-vf", f"scale={ow}:{oh}:flags=lanczos"]
                 encode_args += [*_encoder_args(encoder, crf), "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(silent)]
-                count = emitted = cuts = 0
+                count = emitted = cuts = rife_inferences = 0
                 with _Process(decode_args, cwd=temp, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE) as decoder, \
                         _Process(encode_args, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL) as writer:
                     def emit(frame):
@@ -375,6 +388,8 @@ class WinxVideoApp:
                             break
                         if len(raw) != width * height * 3:
                             raise RuntimeError("FFmpeg returned a partial RGB frame")
+                        if max_source_seconds and Fraction(count, 1) / source_fps >= max_source_seconds:
+                            raise ValueError("Decoded video exceeds max_source_seconds; no output was saved")
                         source_frame = np.frombuffer(raw, np.uint8).reshape(height, width, 3)
                         frame = source_frame.astype(np.float32) / 255
                         if model:
@@ -384,17 +399,24 @@ class WinxVideoApp:
                         if previous is not None:
                             cut = skip_scene_transitions and _scene_cut(previous_source, source_frame)
                             cuts += int(cut)
-                            emit(previous)
-                            pair = _rife_pair(previous, frame) if interpolation > 1 and not cut else None
-                            for step in range(1, interpolation):
+                            pair = None
+                            # Map each output timestamp to its actual source interval.
+                            while emitted < (count - 1) * sample_ratio:
                                 comfy.model_management.throw_exception_if_processing_interrupted()
-                                middle = previous if cut else rife.interpolate(*pair, step / interpolation)[0, :, :ih, :iw].transpose(1, 2, 0)
-                                emit(middle)
+                                timestep = Fraction(emitted, 1) / sample_ratio - (count - 2)
+                                if timestep == 0 or cut or sample_ratio <= 1:
+                                    emit(previous)
+                                else:
+                                    if pair is None:
+                                        pair = _rife_pair(previous, frame)
+                                    middle = rife.interpolate(*pair, float(timestep))[0, :, :ih, :iw].transpose(1, 2, 0)
+                                    rife_inferences += 1
+                                    emit(middle)
                         previous, previous_source = frame, source_frame
                         progress.update(1)
                     if previous is None:
                         raise RuntimeError("No video frames decoded")
-                    for _ in range(interpolation):
+                    while emitted < count * sample_ratio:
                         emit(previous)
                     decoder.wait()
                     writer.process.stdin.close()
@@ -430,6 +452,8 @@ class WinxVideoApp:
                                "duration": float(duration), "audio": info["audio"]},
                     "settings": {"enhancement": enhancement, "model": model_name if model else None,
                                  "interpolation": interpolation, "slow_motion": slow_motion,
+                                 "target_fps": target_fps, "resampling_ratio": str(sample_ratio),
+                                 "rife_inferences": rife_inferences, "max_source_seconds": max_source_seconds,
                                  "stabilization": stabilization, "cuts_skipped": cuts, "preview_source_seconds": preview_seconds,
                                  "ai_input_size": working_size if model else None,
                                  "interpolation_size": interpolation_size, "encoder": encoder, "crf": crf, "device": device},
@@ -437,7 +461,9 @@ class WinxVideoApp:
                     "notes": ["VFR is normalized to CFR before interpolation.",
                               "Fast AI input long edge is at most 640; final resizing is conventional.",
                               "3x/4x dimensions use conventional resizing above the 2x AI model.",
-                              "The final source display interval is held to preserve clip duration."],
+                              "The final source display interval is held; exact target FPS rounds duration up by less than one output frame.",
+                              "Target FPS at or below source FPS keeps/drops source frames without RIFE.",
+                              "Non-integer FPS ratios can need more RIFE calls than a nearby integer multiplier."],
                 }
                 preview = dict(filename=final.name, subfolder=subfolder, type="output", format="video/h264-mp4",
                                frame_rate=float(output_fps), fullpath=str(final))

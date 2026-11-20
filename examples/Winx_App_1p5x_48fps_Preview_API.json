@@ -1,0 +1,22 @@
+{
+  "200": {
+    "class_type": "WinxVideoApp",
+    "inputs": {
+      "video": "upload_video.mp4",
+      "enhancement": "fast",
+      "model_name": "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+      "output_scale": "1.5x",
+      "interpolation": 2,
+      "slow_motion": false,
+      "skip_scene_transitions": true,
+      "stabilization": "off",
+      "preview_seconds": 2.0,
+      "tile_size": 512,
+      "device": "cuda",
+      "crf": 20,
+      "encoder": "auto",
+      "target_fps": 48,
+      "max_source_seconds": 25
+    }
+  }
+}

@@ -44,6 +44,7 @@ def main():
     spec.loader.exec_module(package)
     streaming = sys.modules["winx_streaming_test.streaming"]
     assert streaming._target_size(720, 1280, "1080p") == (1080, 1920), "Resolution must keep orientation"
+    assert streaming._target_size(1080, 1920, "1.5x") == (1620, 2880)
 
     source = directory / "input" / "tiny.mp4"
     subprocess.run([args.ffmpeg, "-y", "-v", "error", "-f", "lavfi", "-i",
@@ -82,6 +83,7 @@ def main():
             audio_stream = next(s for s in streams if s["codec_type"] == "audio")
             assert abs(float(audio_stream["duration"]) - expected_duration) < 0.08, (name, audio_stream)
         assert report["output"]["frames"] == expected_frames, (name, report)
+        assert report["settings"]["rife_inferences"] == len(rife_calls), (name, report)
         assert abs(report["output"]["duration"] - expected_duration) < 0.005, (name, report)
         checks.append({"case": name, "frames": expected_frames, "fps": expected_fps,
                        "duration": expected_duration, "size": expected_size, "audio": audio,
@@ -117,6 +119,62 @@ def main():
     validate_case("fractional_30000_1001fps", {"video": fractional.name, "interpolation": 3},
                   9, 90000 / 1001, 0.1001, audio=False)
     validate_case("auto_encoding", {"encoder": "auto", "interpolation": 1}, 3, 5, 0.6)
+
+    # Non-integer FPS ratios must use the actual output timestamps, not rounded multipliers.
+    fps30 = directory / "input" / "fps30.mp4"
+    subprocess.run([args.ffmpeg, "-y", "-v", "error", "-f", "lavfi", "-i",
+                    "testsrc2=size=96x64:rate=30", "-frames:v", "5", "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p", str(fps30)], check=True, capture_output=True)
+    validate_case("exact_30_to_48fps", {"video": fps30.name, "target_fps": 48},
+                  8, 48, 8 / 48, audio=False)
+    assert rife_calls == [0.625, 0.25, 0.875, 0.5, 0.125, 0.75], rife_calls
+    validate_case("V9_fast_1p5x_exact48", {"video": fps30.name, "enhancement": "fast",
+                  "output_scale": "1.5x", "target_fps": 48, "max_source_seconds": 25},
+                  8, 48, 8 / 48, (144, 96), audio=False)
+    validate_case("exact48_with_audio_and_rounding", {"target_fps": 48},
+                  29, 48, 29 / 48)
+    validate_case("exact_fractional_source_to_48fps", {"video": fractional.name, "target_fps": 48},
+                  5, 48, 5 / 48, audio=False)
+    assert all(0 < t < 1 for t in rife_calls), rife_calls
+    validate_case("target_fps_drops_without_RIFE", {"video": fps30.name, "target_fps": 24},
+                  4, 24, 4 / 24, audio=False)
+    assert not rife_calls
+    validate_case("target_fps_same_as_source", {"video": fps30.name, "target_fps": 30},
+                  5, 30, 5 / 30, audio=False)
+    assert not rife_calls
+    validate_case("exact_fps_hard_cut", {"video": cut_video.name, "target_fps": 8,
+                  "skip_scene_transitions": True}, 5, 8, 5 / 8, audio=False)
+    assert rife_calls == [0.25, 0.875], rife_calls
+
+    boundary_video = directory / "input" / "25seconds.mp4"
+    subprocess.run([args.ffmpeg, "-y", "-v", "error", "-f", "lavfi", "-i",
+                    "color=black:size=32x32:rate=1:duration=25", "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p", str(boundary_video)], check=True, capture_output=True)
+    validate_case("accept_exactly_25s_source", {"video": boundary_video.name, "target_fps": 1,
+                  "max_source_seconds": 25}, 25, 1, 25, (32, 32), audio=False)
+    long_video = directory / "input" / "26seconds.mp4"
+    subprocess.run([args.ffmpeg, "-y", "-v", "error", "-f", "lavfi", "-i",
+                    "color=black:size=32x32:rate=1:duration=26", "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p", str(long_video)], check=True, capture_output=True)
+    real_model_init = streaming.Video4K
+    def forbidden_model_init(*args, **kwargs):
+        raise AssertionError("Overlong source must be rejected before loading AI models")
+    streaming.Video4K = forbidden_model_init
+    try:
+        package.WinxVideoApp().process(**{**base, "video": long_video.name, "enhancement": "fast",
+                                         "target_fps": 48, "max_source_seconds": 25, "preview_seconds": 2})
+    except ValueError as error:
+        assert "at most 25 seconds" in str(error), error
+    else:
+        raise AssertionError("26-second source was accepted by the 25-second preset")
+    finally:
+        streaming.Video4K = real_model_init
+    try:
+        package.WinxVideoApp().process(**{**base, "target_fps": 48, "slow_motion": True})
+    except ValueError as error:
+        assert "slow_motion=false" in str(error), error
+    else:
+        raise AssertionError("Conflicting target FPS and slow motion must be rejected")
     offset_video = directory / "input" / "offset_audio.mp4"
     subprocess.run([args.ffmpeg, "-y", "-v", "error", "-f", "lavfi", "-i",
                     "testsrc2=size=96x64:rate=5:duration=0.6", "-itsoffset", "0.2",
@@ -200,10 +258,20 @@ def main():
                                         cache_args={"lru": 0, "ram": 1.0, "ram_inactive": 1.0})
     loop.run_until_complete(executor.execute_async(prompt, "streaming-local-test", {}, valid[2]))
     assert executor.success, executor.status_messages
+    target_prompt = json.loads((root / "examples" / "Winx_App_1p5x_48fps_Preview_API.json").read_text(encoding="utf-8"))
+    target_prompt["200"]["inputs"].update(video=fps30.name, device="cpu", tile_size=128, encoder="libx264")
+    valid = loop.run_until_complete(execution.validate_prompt("target-fps-local-test", target_prompt, None))
+    assert valid[0], valid
+    executor = execution.PromptExecutor(prompt_server, cache_type=execution.CacheType.NONE,
+                                        cache_args={"lru": 0, "ram": 1.0, "ram_inactive": 1.0})
+    loop.run_until_complete(executor.execute_async(target_prompt, "target-fps-local-test", {}, valid[2]))
+    assert executor.success, executor.status_messages
     loop.close()
     report = {"status": "passed", "device": "CPUExecutionProvider", "cases": checks,
               "additional_checks": ["scene cut detection", "5x audio tempo", "path validation",
-                                    "cancellation cleanup", "inspection timeout", "ComfyUI PromptExecutor"],
+                                    "cancellation cleanup", "inspection timeout", "ComfyUI PromptExecutor",
+                                    "1.5x dimensions", "exact 48fps timestamps", "25s source rejection before AI",
+                                    "target FPS versus slow-motion validation", "new 48fps workflow PromptExecutor"],
               "not_tested": ["CUDA speed", "RunningHub deployment", "browser upload", "two-pass stabilization filters"]}
     (directory / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))

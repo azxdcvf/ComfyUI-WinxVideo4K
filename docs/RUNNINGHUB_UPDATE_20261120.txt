@@ -1,0 +1,16 @@
+请帮我更新之前已安装的同一个节点仓库：
+https://github.com/azxdcvf/ComfyUI-WinxVideo4K
+
+这次继续使用 WinxVideoApp，没有新增模型或依赖，原来的三份模型不需要重新下载。
+
+需要更新实际执行任务的实例中的代码，重启/刷新节点；如果 RunningHub 另有节点字段索引，也请同步：
+1. output_scale 增加选项 1.5x，表示宽、高各为原视频的 1.5 倍。
+2. 末尾追加可选 INT 字段 target_fps，范围 0–120。新工作流填 48，直接按真实 RIFE 插帧时刻输出 48fps；0 保持旧版整数倍模式。
+3. 末尾追加可选 INT 字段 max_source_seconds，范围 0–25。新应用填 25，超过 25 秒或时长未知的上传源片在 AI 推理前拒绝。
+4. 目标帧率模式使用 slow_motion=false。target_fps 非 0 时不再使用 interpolation 倍率；默认尺寸和帧率都可调。
+
+更新后先导入 examples/Winx_App_1p5x_48fps_Preview.json。这是默认快速增强、1.5 倍尺寸、48fps、CUDA、防抖关闭、只处理源片前 2 秒的工作流；上传的源片最长 25 秒。
+整片版本是 examples/Winx_App_1p5x_48fps_Full.json，preview_seconds=0，处理允许范围内的整片。
+
+旧工作流继续保留。新参数已经通过本地真实模型/FFmpeg 和 ComfyUI 执行验证，但没有再次提交付费云测。快速模式仍限制 AI/插帧工作尺寸，较大输出含普通缩放；1.5 倍尺寸不表示清晰度客观提高 50%。
+应用目标是 15 秒源片在 10 分钟内完成，但新参数的云端整片速度还需要实际验证，目前不能保证。
