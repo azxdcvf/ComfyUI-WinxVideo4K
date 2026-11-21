@@ -1,0 +1,1011 @@
+{
+  "id": "9160d195-4dd5-41b1-8ff8-ad11abadbacd",
+  "revision": 0,
+  "last_node_id": 212,
+  "last_link_id": 14,
+  "nodes": [
+    {
+      "id": 202,
+      "type": "PrimitiveInt",
+      "pos": [
+        20,
+        640
+      ],
+      "size": [
+        340,
+        112
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "localized_name": "数值",
+          "name": "value",
+          "type": "INT",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "INT",
+          "localized_name": "整数",
+          "name": "INT",
+          "type": "INT",
+          "slot_index": 0,
+          "links": [
+            1
+          ]
+        }
+      ],
+      "title": "目标帧率 / FPS（1–120，默认48）",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        48,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "value": 48,
+        "control_after_generate": "fixed"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 200,
+      "type": "WinxVideoApp",
+      "pos": [
+        1020,
+        -240
+      ],
+      "size": [
+        580,
+        1509.111111111111
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "localized_name": "video",
+          "name": "video",
+          "type": "COMBO",
+          "widget": {
+            "name": "video"
+          },
+          "link": 6
+        },
+        {
+          "label": "enhancement",
+          "localized_name": "enhancement",
+          "name": "enhancement",
+          "type": "COMBO",
+          "widget": {
+            "name": "enhancement"
+          },
+          "link": 8
+        },
+        {
+          "label": "model_name",
+          "localized_name": "model_name",
+          "name": "model_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "model_name"
+          },
+          "link": null
+        },
+        {
+          "label": "output_scale",
+          "localized_name": "output_scale",
+          "name": "output_scale",
+          "type": "COMBO",
+          "widget": {
+            "name": "output_scale"
+          },
+          "link": 10
+        },
+        {
+          "label": "interpolation",
+          "localized_name": "interpolation",
+          "name": "interpolation",
+          "type": "INT",
+          "widget": {
+            "name": "interpolation"
+          },
+          "link": null
+        },
+        {
+          "label": "slow_motion",
+          "localized_name": "slow_motion",
+          "name": "slow_motion",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "slow_motion"
+          },
+          "link": null
+        },
+        {
+          "label": "skip_scene_transitions",
+          "localized_name": "skip_scene_transitions",
+          "name": "skip_scene_transitions",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "skip_scene_transitions"
+          },
+          "link": null
+        },
+        {
+          "label": "stabilization",
+          "localized_name": "stabilization",
+          "name": "stabilization",
+          "type": "COMBO",
+          "widget": {
+            "name": "stabilization"
+          },
+          "link": null
+        },
+        {
+          "label": "preview_seconds",
+          "localized_name": "preview_seconds",
+          "name": "preview_seconds",
+          "type": "FLOAT",
+          "widget": {
+            "name": "preview_seconds"
+          },
+          "link": null
+        },
+        {
+          "label": "tile_size",
+          "localized_name": "tile_size",
+          "name": "tile_size",
+          "type": "INT",
+          "widget": {
+            "name": "tile_size"
+          },
+          "link": null
+        },
+        {
+          "label": "device",
+          "localized_name": "device",
+          "name": "device",
+          "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
+          "link": null
+        },
+        {
+          "label": "crf",
+          "localized_name": "crf",
+          "name": "crf",
+          "type": "INT",
+          "widget": {
+            "name": "crf"
+          },
+          "link": null
+        },
+        {
+          "label": "encoder",
+          "localized_name": "encoder",
+          "name": "encoder",
+          "type": "COMBO",
+          "widget": {
+            "name": "encoder"
+          },
+          "link": null
+        },
+        {
+          "label": "target_fps",
+          "localized_name": "target_fps",
+          "name": "target_fps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "target_fps"
+          },
+          "link": 1
+        },
+        {
+          "label": "max_source_seconds",
+          "localized_name": "max_source_seconds",
+          "name": "max_source_seconds",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "max_source_seconds"
+          },
+          "link": null
+        },
+        {
+          "label": "upload",
+          "localized_name": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video",
+          "localized_name": "video",
+          "name": "video",
+          "type": "VHS_FILENAMES",
+          "links": [
+            2
+          ]
+        },
+        {
+          "label": "report",
+          "localized_name": "report",
+          "name": "report",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "title": "视频增强 + RIFE真实插帧 · 最多前25秒",
+      "properties": {
+        "Node name for S&R": "WinxVideoApp",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "None",
+        "fast",
+        "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+        "1.5x",
+        2,
+        false,
+        true,
+        "off",
+        25,
+        512,
+        "cuda",
+        20,
+        "auto",
+        48,
+        0,
+        "image",
+        "image"
+      ],
+      "widgets_values_named": {
+        "video": "None",
+        "enhancement": "fast",
+        "model_name": "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+        "output_scale": "1.5x",
+        "interpolation": 2,
+        "slow_motion": false,
+        "skip_scene_transitions": true,
+        "stabilization": "off",
+        "preview_seconds": 25,
+        "tile_size": 512,
+        "device": "cuda",
+        "crf": 20,
+        "encoder": "auto",
+        "target_fps": 48,
+        "max_source_seconds": 0,
+        "upload": "image",
+        "choose video to upload": "image"
+      }
+    },
+    {
+      "id": 201,
+      "type": "Note",
+      "pos": [
+        1430,
+        400
+      ],
+      "size": [
+        760,
+        700
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "视频增强与真实插帧｜AI应用正式版\n\n默认：快速增强 fast，宽高各1.5倍，目标48fps，GPU。\n时长：最多处理前25秒；不足25秒就处理实际完整长度；不拉长、不慢放。\n\n应用输入：206.file 上传视频；208.value 增强模式；210.value 输出尺寸；202.value 目标帧率。\n增强模式：fast=快速；quality=质量；off=关闭增强。\n尺寸：source=原尺寸；1.5x=宽高各1.5倍；2x/3x/4x；1280_long_edge；720p/1080p/1440p/2160p。\n\n200节点preview_seconds=25负责截取；max_source_seconds=0允许长片上传后截取。\n输出由203→204→205标准视频输出节点接入应用。\n请勿修改路径适配与固定处理节点。\n\n2026-11-22 启动校验修复：需更新同一GitHub节点仓库并注册WinxVideoFromPath。204已替换为该节点；原有模型不变。"
+      ],
+      "widgets_values_named": {
+        "text": "视频增强与真实插帧｜AI应用正式版\n\n默认：快速增强 fast，宽高各1.5倍，目标48fps，GPU。\n时长：最多处理前25秒；不足25秒就处理实际完整长度；不拉长、不慢放。\n\n应用输入：206.file 上传视频；208.value 增强模式；210.value 输出尺寸；202.value 目标帧率。\n增强模式：fast=快速；quality=质量；off=关闭增强。\n尺寸：source=原尺寸；1.5x=宽高各1.5倍；2x/3x/4x；1280_long_edge；720p/1080p/1440p/2160p。\n\n200节点preview_seconds=25负责截取；max_source_seconds=0允许长片上传后截取。\n输出由203→204→205标准视频输出节点接入应用。\n请勿修改路径适配与固定处理节点。\n\n2026-11-22 启动校验修复：需更新同一GitHub节点仓库并注册WinxVideoFromPath。204已替换为该节点；原有模型不变。"
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 203,
+      "type": "VHS_SelectFilename",
+      "pos": [
+        1430,
+        -180
+      ],
+      "size": [
+        228,
+        58
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "文件名",
+          "localized_name": "filenames",
+          "name": "filenames",
+          "type": "VHS_FILENAMES",
+          "link": 2
+        },
+        {
+          "localized_name": "编号",
+          "name": "index",
+          "type": "INT",
+          "widget": {
+            "name": "index"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "文件名",
+          "localized_name": "Filename",
+          "name": "Filename",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_SelectFilename",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": {
+        "index": -1
+      },
+      "widgets_values_named": {
+        "index": -1
+      }
+    },
+    {
+      "id": 204,
+      "type": "WinxVideoFromPath",
+      "pos": [
+        1430,
+        0
+      ],
+      "size": [
+        330,
+        72
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "file",
+          "type": "STRING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "title": "成片交接 · 原生VIDEO（已修复）",
+      "properties": {
+        "Node name for S&R": "WinxVideoFromPath"
+      },
+      "widgets_values": [],
+      "widgets_values_named": {}
+    },
+    {
+      "id": 205,
+      "type": "SaveVideo",
+      "pos": [
+        1810,
+        -180
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "localized_name": "视频",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 4
+        },
+        {
+          "label": "filename_prefix",
+          "localized_name": "文件名前缀",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "label": "format",
+          "localized_name": "格式",
+          "name": "format",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "label": "format.codec",
+          "localized_name": "编解码器",
+          "name": "format.codec",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format.codec"
+          },
+          "link": null
+        },
+        {
+          "label": "codec",
+          "localized_name": "编码器",
+          "name": "codec",
+          "shape": 7,
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "codec"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video_url",
+          "localized_name": "video",
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "label": "video",
+          "localized_name": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "title": "AI应用输出 · 最终MP4",
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/WinxApp",
+        "auto",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "video/WinxApp",
+        "format": "auto",
+        "format.codec": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 207,
+      "type": "String To Combo JK",
+      "pos": [
+        680,
+        -240
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "string",
+          "localized_name": "string",
+          "name": "string",
+          "type": "STRING",
+          "widget": {
+            "name": "string"
+          },
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "label": "any",
+          "localized_name": "any",
+          "name": "any",
+          "type": "*",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "title": "视频文件名接入（固定）",
+      "properties": {
+        "Node name for S&R": "String To Combo JK",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "string": ""
+      }
+    },
+    {
+      "id": 209,
+      "type": "String To Combo JK",
+      "pos": [
+        370,
+        120
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "string",
+          "localized_name": "string",
+          "name": "string",
+          "type": "STRING",
+          "widget": {
+            "name": "string"
+          },
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "label": "any",
+          "localized_name": "any",
+          "name": "any",
+          "type": "*",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "增强模式接入（固定）",
+      "properties": {
+        "Node name for S&R": "String To Combo JK",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "string": ""
+      }
+    },
+    {
+      "id": 211,
+      "type": "String To Combo JK",
+      "pos": [
+        370,
+        380
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "string",
+          "localized_name": "string",
+          "name": "string",
+          "type": "STRING",
+          "widget": {
+            "name": "string"
+          },
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "label": "any",
+          "localized_name": "any",
+          "name": "any",
+          "type": "*",
+          "links": [
+            10
+          ]
+        }
+      ],
+      "title": "输出尺寸接入（固定）",
+      "properties": {
+        "Node name for S&R": "String To Combo JK",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "string": ""
+      }
+    },
+    {
+      "id": 206,
+      "type": "LoadVideo",
+      "pos": [
+        20,
+        -240
+      ],
+      "size": [
+        270,
+        602
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "文件",
+          "name": "file",
+          "type": "COMBO",
+          "widget": {
+            "name": "file"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "keep_audio",
+          "name": "keep_audio",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "keep_audio"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "trim_time",
+          "name": "trim_time",
+          "type": "STRING",
+          "widget": {
+            "name": "trim_time"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "选择要上传的文件",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "视频",
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "None",
+        true,
+        "0",
+        "image"
+      ],
+      "widgets_values_named": {
+        "file": "None",
+        "keep_audio": true,
+        "trim_time": "0",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 212,
+      "type": "VideoToPath",
+      "pos": [
+        370,
+        -240
+      ],
+      "size": [
+        270,
+        78
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "localized_name": "video",
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 11
+        },
+        {
+          "label": "frames",
+          "localized_name": "frames",
+          "name": "frames",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "fps",
+          "localized_name": "fps",
+          "name": "fps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video_path",
+          "localized_name": "video_path",
+          "name": "video_path",
+          "type": "STRING",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "title": "读取源视频路径（固定）",
+      "properties": {
+        "Node name for S&R": "VideoToPath",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        25
+      ],
+      "widgets_values_named": {
+        "fps": 25
+      }
+    },
+    {
+      "id": 208,
+      "type": "PrimitiveString",
+      "pos": [
+        20,
+        120
+      ],
+      "size": [
+        306.9595703125,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "localized_name": "值",
+          "name": "value",
+          "type": "STRING",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "STRING",
+          "localized_name": "字符串",
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "title": "增强模式：fast快速 / quality质量 / off关闭",
+      "properties": {
+        "Node name for S&R": "PrimitiveString",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "fast"
+      ],
+      "widgets_values_named": {
+        "value": "fast"
+      }
+    },
+    {
+      "id": 210,
+      "type": "PrimitiveString",
+      "pos": [
+        20,
+        380
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "localized_name": "值",
+          "name": "value",
+          "type": "STRING",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "STRING",
+          "localized_name": "字符串",
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            14
+          ]
+        }
+      ],
+      "title": "输出尺寸：默认1.5x（宽高各1.5倍）",
+      "properties": {
+        "Node name for S&R": "PrimitiveString",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "1.5x"
+      ],
+      "widgets_values_named": {
+        "value": "1.5x"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      202,
+      0,
+      200,
+      13,
+      "INT"
+    ],
+    [
+      2,
+      200,
+      0,
+      203,
+      0,
+      "VHS_FILENAMES"
+    ],
+    [
+      3,
+      203,
+      0,
+      204,
+      0,
+      "STRING"
+    ],
+    [
+      6,
+      207,
+      0,
+      200,
+      0,
+      "COMBO"
+    ],
+    [
+      8,
+      209,
+      0,
+      200,
+      1,
+      "COMBO"
+    ],
+    [
+      10,
+      211,
+      0,
+      200,
+      3,
+      "COMBO"
+    ],
+    [
+      11,
+      206,
+      0,
+      212,
+      0,
+      "VIDEO"
+    ],
+    [
+      12,
+      212,
+      0,
+      207,
+      0,
+      "STRING"
+    ],
+    [
+      13,
+      208,
+      0,
+      209,
+      0,
+      "STRING"
+    ],
+    [
+      14,
+      210,
+      0,
+      211,
+      0,
+      "STRING"
+    ],
+    [
+      4,
+      204,
+      0,
+      205,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.45,
+      "offset": [
+        1527.6666666666667,
+        201.66666666666663
+      ]
+    }
+  },
+  "version": 0.4
+}

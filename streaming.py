@@ -25,6 +25,8 @@ OUTPUT_SCALES = ["1280_long_edge", "source", "1.5x", "2x", "3x", "4x", "720p", "
 
 
 def _video_path(video):
+    if not isinstance(video, str) or not video:
+        raise ValueError("Select a video uploaded into the ComfyUI input directory")
     path = Path(folder_paths.get_annotated_filepath(video)).resolve()
     if not path.is_relative_to(Path(folder_paths.get_input_directory()).resolve()) or not path.is_file():
         raise ValueError("Select a video uploaded into the ComfyUI input directory")
@@ -280,6 +282,9 @@ class WinxVideoApp:
 
     @classmethod
     def VALIDATE_INPUTS(cls, video, **kwargs):
+        # ComfyUI supplies None for linked values before their upstream nodes execute.
+        if video is None:
+            return True
         try:
             _video_path(video)
         except (ValueError, OSError) as error:
@@ -288,6 +293,8 @@ class WinxVideoApp:
 
     @classmethod
     def IS_CHANGED(cls, video, **kwargs):
+        if video is None:
+            return float("nan")
         stat = _video_path(video).stat()
         return f"{stat.st_mtime_ns}:{stat.st_size}"
 

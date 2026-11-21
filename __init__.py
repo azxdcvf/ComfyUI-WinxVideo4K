@@ -9,6 +9,7 @@ import folder_paths
 
 from .runtime import RIFE_MODEL, VIDEO4K_MODELS, Rife46, Video4K
 from .streaming import WinxVideoApp
+from .video_output import WinxVideoFromPath
 
 WEB_DIRECTORY = "./web"
 
@@ -106,9 +107,11 @@ class WinxRife46:
         return (result, float(source_fps * multiplier))
 
 
-NODE_CLASS_MAPPINGS = {"WinxVideo4KUpscale": WinxVideo4KUpscale, "WinxRife46": WinxRife46, "WinxVideoApp": WinxVideoApp}
+NODE_CLASS_MAPPINGS = {"WinxVideo4KUpscale": WinxVideo4KUpscale, "WinxRife46": WinxRife46,
+                       "WinxVideoApp": WinxVideoApp, "WinxVideoFromPath": WinxVideoFromPath}
 NODE_DISPLAY_NAME_MAPPINGS = {
     "WinxVideo4KUpscale": "Video4K V9/V10 · 2x (ONNX)",
     "WinxRife46": "RIFE 4.6 · Frame Interpolation (ONNX)",
     "WinxVideoApp": "Winx Video App · Streaming Enhance + RIFE",
+    "WinxVideoFromPath": "Winx Output Video · Native VIDEO",
 }

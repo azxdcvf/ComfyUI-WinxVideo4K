@@ -1,0 +1,167 @@
+{
+  "200": {
+    "inputs": {
+      "video": [
+        "207",
+        0
+      ],
+      "enhancement": [
+        "209",
+        0
+      ],
+      "model_name": "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+      "output_scale": [
+        "211",
+        0
+      ],
+      "interpolation": 2,
+      "slow_motion": false,
+      "skip_scene_transitions": true,
+      "stabilization": "off",
+      "preview_seconds": 25,
+      "tile_size": 512,
+      "device": "cuda",
+      "crf": 20,
+      "encoder": "auto",
+      "target_fps": [
+        "202",
+        0
+      ],
+      "max_source_seconds": 0
+    },
+    "class_type": "WinxVideoApp",
+    "_meta": {
+      "title": "视频增强 + RIFE真实插帧 · 最多前25秒"
+    }
+  },
+  "202": {
+    "inputs": {
+      "value": 48
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "目标帧率 / FPS（1–120，默认48）"
+    }
+  },
+  "203": {
+    "inputs": {
+      "index": -1,
+      "filenames": [
+        "200",
+        0
+      ]
+    },
+    "class_type": "VHS_SelectFilename",
+    "_meta": {
+      "title": "选择文件名"
+    }
+  },
+  "204": {
+    "inputs": {
+      "file": [
+        "203",
+        0
+      ]
+    },
+    "class_type": "WinxVideoFromPath",
+    "_meta": {
+      "title": "成片交接 · 原生VIDEO（已修复）"
+    }
+  },
+  "205": {
+    "inputs": {
+      "filename_prefix": "video/WinxApp",
+      "format": "auto",
+      "format.codec": "auto",
+      "codec": "auto",
+      "fw_video_preview": "",
+      "video": [
+        "204",
+        0
+      ]
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "AI应用输出 · 最终MP4"
+    }
+  },
+  "206": {
+    "inputs": {
+      "file": "None",
+      "keep_audio": true,
+      "trim_time": "0",
+      "video-preview": ""
+    },
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "加载视频"
+    }
+  },
+  "207": {
+    "inputs": {
+      "string": [
+        "212",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "视频文件名接入（固定）"
+    }
+  },
+  "208": {
+    "inputs": {
+      "value": "fast"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "增强模式：fast快速 / quality质量 / off关闭"
+    }
+  },
+  "209": {
+    "inputs": {
+      "string": [
+        "208",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "增强模式接入（固定）"
+    }
+  },
+  "210": {
+    "inputs": {
+      "value": "1.5x"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "输出尺寸：默认1.5x（宽高各1.5倍）"
+    }
+  },
+  "211": {
+    "inputs": {
+      "string": [
+        "210",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "输出尺寸接入（固定）"
+    }
+  },
+  "212": {
+    "inputs": {
+      "fps": 25,
+      "video": [
+        "206",
+        0
+      ]
+    },
+    "class_type": "VideoToPath",
+    "_meta": {
+      "title": "读取源视频路径（固定）"
+    }
+  }
+}

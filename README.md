@@ -11,6 +11,7 @@ Video4K V9/V10 的画质增强、RIFE 4.6 的真实插帧，以及可调尺寸�
 | `WinxVideo4KUpscale` | Video4K V9/V10 ONNX，宽高各 2 倍 | `model_name`、`device`、`tile_size` |
 | `WinxRife46` | RIFE 4.6 ONNX，1 至 5 倍帧率，旧版 IMAGE 接口 | `source_fps`、`multiplier`、`device` |
 | `WinxVideoApp` | 文件流式处理、可调尺寸、目标帧率或 1–5 倍插帧、慢动作、硬切处理、防抖 | 上传视频和可调应用参数，输出 MP4 与运行报告 |
+| `WinxVideoFromPath` | 将已生成的 MP4 交给原生 `SaveVideo`，不解码整片帧 | 接收 `VHS_SelectFilename` 输出的文件路径 |
 
 节点分类：`Winx Video4K`。
 
@@ -32,6 +33,14 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 - VHS 可调用的 FFmpeg，用于导出 H.264 MP4 和音频。
 
 安装后重启实际执行任务的 ComfyUI 服务。RunningHub 维护者请参考 [云端安装与验收说明](docs/INSTALL_RUNNINGHUB.md)。
+
+## AI 应用启动校验修复（2026-11-22）
+
+应用出现 `prompt_outputs_failed_validation`、`Select a video uploaded into the ComfyUI input directory` 或 `NoneType.endswith` 时，参考 [修复与部署说明](docs/RUNNINGHUB_APP_LINK_FIX.md)。本次修复使 `WinxVideoApp` 的校验和缓存检查兼容上游连线输入，并新增轻量的 `WinxVideoFromPath` 结果适配节点，替换不兼容动态路径校验的读取节点。原有模型、增强和插帧算法、`WinxVideoApp` 的两个输出接口保持兼容。
+
+[25 秒可调应用工作流](examples/Winx_App_Adjustable_25s_RunningHub.json) 默认 `fast`、宽高各 `1.5x`、`48fps`、CUDA；最多处理前 25 秒，较短视频处理实际完整长度，较长视频截取前 25 秒。其 `preview_seconds=25`、`max_source_seconds=0`，与下面保留的“拒绝超过 25 秒源片”旧模板不同。上传视频、增强模式、输出尺寸和目标帧率四个应用输入保持原节点编号，封面和标签由发布者设置。另附 [API 工作流](examples/Winx_App_Adjustable_25s_RunningHub_API.json)。
+
+本地已用真实 ComfyUI `validate_prompt` 复现修复前的连线校验错误，修复后通过真实 ONNX / FFmpeg / PromptExecutor / 原生 `SaveVideo`，生成 1.5 倍尺寸、48fps、带音轨的微型样片。**本地通过不代表 RunningHub 已同步代码；平台仍需更新实际执行实例、注册 `WinxVideoFromPath` 并同步节点定义，再更新已发布应用的工作流快照。** 本次没有新增依赖或模型，也不会自动发起云端任务。
 
 ## 新增：1.5 倍尺寸 / 48fps 可调应用（2026-11-20）
 

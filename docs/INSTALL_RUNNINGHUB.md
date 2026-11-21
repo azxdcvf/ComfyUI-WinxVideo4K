@@ -4,6 +4,8 @@
 
 仓库地址：<https://github.com/azxdcvf/ComfyUI-WinxVideo4K>。
 
+2026-11-22 的 AI 应用启动校验修复需要同步 `streaming.py`、`video_output.py` 与 `__init__.py`，并注册新节点 `WinxVideoFromPath`。具体步骤、原错误及本地验证见 [应用启动校验修复](RUNNINGHUB_APP_LINK_FIX.md)。本次不更换模型和运行库；仅更新编辑器 JSON 不能代替执行实例代码更新。
+
 ## 已安装旧版时更新新版流式应用
 
 新增注册类型为 **`WinxVideoApp`**，原有 `WinxVideo4KUpscale` / `WinxRife46` 和示例仍保留。更新不需要重新下载已安装且校验正确的三份模型。
