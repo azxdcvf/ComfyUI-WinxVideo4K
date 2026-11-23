@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+import zipfile
 from fractions import Fraction
 from pathlib import Path
 
@@ -22,6 +23,23 @@ from .runtime import RIFE_MODEL, VIDEO4K_MODELS, Rife46, Video4K
 
 VIDEO_EXTENSIONS = {"mp4", "mkv", "mov", "avi", "webm", "m4v", "mpeg", "mpg", "ts", "m2ts"}
 OUTPUT_SCALES = ["1280_long_edge", "source", "1.5x", "2x", "3x", "4x", "720p", "1080p", "1440p", "2160p"]
+
+
+def _output_ui(final, subfolder, frame_rate, zip_output=False):
+    if not zip_output:
+        return {"gifs": [dict(filename=final.name, subfolder=subfolder, type="output",
+                              format="video/h264-mp4", frame_rate=float(frame_rate), fullpath=str(final))]}
+    archive = final.with_suffix(".zip")
+    temporary = archive.with_suffix(".part.zip")
+    try:
+        # MP4 is already compressed. Store its bytes without encoding the video again.
+        with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_STORED) as bundle:
+            bundle.write(final, arcname=final.name)
+        os.replace(temporary, archive)
+    finally:
+        temporary.unlink(missing_ok=True)
+    # Same file descriptor used by the installed solarL SaveImagesToZip node.
+    return {"images": [dict(filename=archive.name, subfolder=subfolder, type="output")]}
 
 
 def _video_path(video):
@@ -271,6 +289,7 @@ class WinxVideoApp:
             # Append fields so existing serialized widgets keep their positions.
             "target_fps": ("INT", {"default": 0, "min": 0, "max": 120, "tooltip": "1-120: exact output FPS, overrides interpolation. 0: legacy integer multiplier. Cannot combine with slow motion. Lower/equal FPS drops/keeps frames without RIFE."}),
             "max_source_seconds": ("INT", {"default": 0, "min": 0, "max": 25, "tooltip": "Reject longer uploaded videos before AI processing, even in preview mode. 0: no duration limit for legacy workflows."}),
+            "zip_output": ("BOOLEAN", {"default": False, "label_on": "ZIP", "label_off": "MP4", "tooltip": "Off: return one MP4. On: return one ZIP containing the finished MP4 without re-encoding. Remove downstream SaveVideo nodes to avoid duplicate application outputs."}),
         }}
 
     RETURN_TYPES = ("VHS_FILENAMES", "STRING")
@@ -300,7 +319,10 @@ class WinxVideoApp:
 
     def process(self, video, enhancement, model_name, output_scale, interpolation,
                 slow_motion, skip_scene_transitions, stabilization, preview_seconds,
-                tile_size, device, crf, encoder="auto", target_fps=0, max_source_seconds=0):
+                tile_size, device, crf, encoder="auto", target_fps=0, max_source_seconds=0,
+                zip_output=False):
+        if not isinstance(zip_output, bool):
+            raise ValueError("zip_output must be a boolean")
         if enhancement not in ("fast", "quality", "off") or output_scale not in OUTPUT_SCALES:
             raise ValueError("Invalid enhancement or output scale")
         if model_name not in VIDEO4K_MODELS or device not in ("cuda", "cpu"):
@@ -458,6 +480,7 @@ class WinxVideoApp:
                                "fps": float(output_fps), "fps_fraction": str(output_fps),
                                "duration": float(duration), "audio": info["audio"]},
                     "settings": {"enhancement": enhancement, "model": model_name if model else None,
+                                 "zip_output": zip_output,
                                  "interpolation": interpolation, "slow_motion": slow_motion,
                                  "target_fps": target_fps, "resampling_ratio": str(sample_ratio),
                                  "rife_inferences": rife_inferences, "max_source_seconds": max_source_seconds,
@@ -472,9 +495,8 @@ class WinxVideoApp:
                               "Target FPS at or below source FPS keeps/drops source frames without RIFE.",
                               "Non-integer FPS ratios can need more RIFE calls than a nearby integer multiplier."],
                 }
-                preview = dict(filename=final.name, subfolder=subfolder, type="output", format="video/h264-mp4",
-                               frame_rate=float(output_fps), fullpath=str(final))
-                return {"ui": {"gifs": [preview]}, "result": ((True, [str(final)]), json.dumps(report, ensure_ascii=False))}
+                ui = _output_ui(final, subfolder, output_fps, zip_output)
+                return {"ui": ui, "result": ((True, [str(final)]), json.dumps(report, ensure_ascii=False))}
             finally:
                 if final_part is not None:
                     final_part.unlink(missing_ok=True)

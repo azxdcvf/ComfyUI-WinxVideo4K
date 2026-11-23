@@ -34,6 +34,12 @@ git clone https://github.com/azxdcvf/ComfyUI-WinxVideo4K.git
 
 安装后重启实际执行任务的 ComfyUI 服务。RunningHub 维护者请参考 [云端安装与验收说明](docs/INSTALL_RUNNINGHUB.md)。
 
+## MP4 / ZIP 输出开关（2026-11-23）
+
+新增[独立工作流](examples/Winx_App_Adjustable_25s_OutputSwitch_RunningHub.json)与[API 图](examples/Winx_App_Adjustable_25s_OutputSwitch_RunningHub_API.json)。`216 PrimitiveBoolean.value` 默认关闭，连接到 `WinxVideoApp.zip_output`：关闭只返回一个 MP4；开启只返回一个 ZIP，内含本次成片 MP4。ZIP 原样存储视频字节，不重新编码。新版移除了下游重复保存链路，解决同一成片在应用中返回两份的问题；原示例保持。
+
+默认仍为 fast、宽高各 1.5 倍、48fps、最多处理前 25 秒。无需新增模型或依赖；RunningHub 仍须同步新的 `zip_output` 节点字段、实际 GPU 执行实例及应用快照，ZIP 附件下载需云端验收。部署步骤与五项输入映射见[输出开关说明](docs/RUNNINGHUB_OUTPUT_SWITCH.md)。
+
 ## AI 应用启动校验修复（2026-11-22）
 
 应用出现 `prompt_outputs_failed_validation`、`Select a video uploaded into the ComfyUI input directory` 或 `NoneType.endswith` 时，参考 [修复与部署说明](docs/RUNNINGHUB_APP_LINK_FIX.md)。本次修复使 `WinxVideoApp` 的校验和缓存检查兼容上游连线输入，并新增轻量的 `WinxVideoFromPath` 结果适配节点，替换不兼容动态路径校验的读取节点。原有模型、增强和插帧算法、`WinxVideoApp` 的两个输出接口保持兼容。

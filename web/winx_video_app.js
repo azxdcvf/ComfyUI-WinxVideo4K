@@ -42,7 +42,33 @@ app.registerExtension({
 
         const executed = nodeType.prototype.onExecuted;
         nodeType.prototype.onExecuted = function (message) {
-            const result = executed?.apply(this, arguments);
+            const archive = message.images?.find((file) => file.filename?.endsWith(".zip"));
+            const result = archive ? executed?.call(this, { ...message, images: [] }) : executed?.apply(this, arguments);
+            if (archive) {
+                if (this.winxPreview) {
+                    this.winxPreview.pause();
+                    this.winxPreview.removeAttribute("src");
+                    this.winxPreview.load();
+                    this.winxPreview.style.display = "none";
+                }
+                if (!this.winxArchiveLink) {
+                    const link = document.createElement("a");
+                    link.style.cssText = "display:block;padding:12px;color:#9ee6ff;text-decoration:underline";
+                    const widget = this.addDOMWidget("winx_zip_download", "zip", link, { serialize: false });
+                    widget.computeSize = (width) => [width, link.style.display === "none" ? 0 : 50];
+                    widget.serialize = false;
+                    this.winxArchiveLink = link;
+                }
+                const params = new URLSearchParams({ filename: archive.filename, subfolder: archive.subfolder || "", type: archive.type });
+                this.winxArchiveLink.href = api.apiURL(`/view?${params}`);
+                this.winxArchiveLink.download = archive.filename;
+                this.winxArchiveLink.textContent = `下载 ZIP / Download ZIP: ${archive.filename}`;
+                this.winxArchiveLink.style.display = "block";
+                this.setSize(this.computeSize());
+                app.graph.setDirtyCanvas(true, true);
+                return result;
+            }
+            if (this.winxArchiveLink) this.winxArchiveLink.style.display = "none";
             const preview = message.gifs?.[0];
             if (!preview) return result;
             if (!this.winxPreview) {
@@ -51,11 +77,12 @@ app.registerExtension({
                 video.preload = "metadata";
                 video.style.cssText = "width:100%;height:100%;object-fit:contain;background:#111";
                 const widget = this.addDOMWidget("winx_preview", "video", video, { serialize: false });
-                widget.computeSize = (width) => [width, 260];
+                widget.computeSize = (width) => [width, video.style.display === "none" ? 0 : 260];
                 widget.serialize = false;
                 this.winxPreview = video;
             }
             const params = new URLSearchParams({ filename: preview.filename, subfolder: preview.subfolder || "", type: preview.type });
+            this.winxPreview.style.display = "block";
             this.winxPreview.src = api.apiURL(`/view?${params}`);
             this.setSize(this.computeSize());
             app.graph.setDirtyCanvas(true, true);

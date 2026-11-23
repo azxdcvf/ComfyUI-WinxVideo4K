@@ -1,0 +1,152 @@
+{
+  "200": {
+    "inputs": {
+      "video": [
+        "207",
+        0
+      ],
+      "enhancement": [
+        "209",
+        0
+      ],
+      "model_name": "Video4K_V9_video_V9_x2_S2GAN_latest.onnx",
+      "output_scale": [
+        "211",
+        0
+      ],
+      "interpolation": 2,
+      "slow_motion": false,
+      "skip_scene_transitions": true,
+      "stabilization": "off",
+      "preview_seconds": 25,
+      "tile_size": 512,
+      "device": "cuda",
+      "crf": 20,
+      "encoder": "auto",
+      "target_fps": [
+        "202",
+        0
+      ],
+      "max_source_seconds": 0,
+      "上传视频 / Upload video": null,
+      "video-preview": "",
+      "zip_output": [
+        "216",
+        0
+      ]
+    },
+    "class_type": "WinxVideoApp",
+    "_meta": {
+      "title": "视频增强 + 真实插帧 + MP4/ZIP输出"
+    }
+  },
+  "202": {
+    "inputs": {
+      "value": 48
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "目标帧率 / FPS（1–120，默认48）"
+    }
+  },
+  "206": {
+    "inputs": {
+      "file": "upload_video.mp4",
+      "keep_audio": true,
+      "trim_time": "0",
+      "video-preview": ""
+    },
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "上传视频 · 最多处理前25秒"
+    }
+  },
+  "207": {
+    "inputs": {
+      "string": [
+        "215",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "视频文件名接入（固定）"
+    }
+  },
+  "208": {
+    "inputs": {
+      "value": "fast"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "增强模式：fast快速 / quality质量 / off关闭"
+    }
+  },
+  "209": {
+    "inputs": {
+      "string": [
+        "208",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "增强模式接入（固定）"
+    }
+  },
+  "210": {
+    "inputs": {
+      "value": "1.5x"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "输出尺寸：默认1.5x（宽高各1.5倍）"
+    }
+  },
+  "211": {
+    "inputs": {
+      "string": [
+        "210",
+        0
+      ]
+    },
+    "class_type": "String To Combo JK",
+    "_meta": {
+      "title": "输出尺寸接入（固定）"
+    }
+  },
+  "212": {
+    "inputs": {
+      "fps": 25,
+      "video": [
+        "206",
+        0
+      ]
+    },
+    "class_type": "VideoToPath",
+    "_meta": {
+      "title": "读取源视频路径"
+    }
+  },
+  "215": {
+    "inputs": {
+      "full_path": [
+        "212",
+        0
+      ]
+    },
+    "class_type": "RB_GetFilename",
+    "_meta": {
+      "title": "云端路径适配 · 取上传文件名"
+    }
+  },
+  "216": {
+    "class_type": "PrimitiveBoolean",
+    "inputs": {
+      "value": false
+    },
+    "_meta": {
+      "title": "ZIP输出 · 默认关闭=MP4，开启=ZIP"
+    }
+  }
+}
